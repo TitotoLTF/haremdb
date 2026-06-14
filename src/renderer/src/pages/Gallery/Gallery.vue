@@ -214,16 +214,22 @@ function switchSortOrder() {
   sortOptions.value.selectOrder = orders[nextIndex]
 }
 
-// 监听页码,排序字段,文件名搜索变化
+// 搜索条件或排序方式变化时，重置页码为1
+watch(
+  [searchTags, searchName, sortBy],
+  () => {
+    currentPage.value = 1
+  },
+  { deep: true }
+)
+
+// 监听页码、排序、搜索条件变化，请求数据
 watch(
   [currentPage, sortBy, searchTags, searchName],
   () => {
     debouncedFetchData()
   },
-  {
-    immediate: true,
-    deep: true
-  }
+  { immediate: true, deep: true }
 )
 
 const isInsideDrag = inject('isInsideDrag')
