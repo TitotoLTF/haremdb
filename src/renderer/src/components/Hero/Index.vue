@@ -16,7 +16,7 @@
     </div>
     <div class="w-full flex flex-col gap-2 flex-1">
       <!-- 第一行 -->
-      <TagSelect v-model="file.tags" />
+      <TagSelect v-model="file.tags" :allow-create="true" />
 
       <!-- 第二行 -->
       <div class="w-full flex gap-2 flex-1">
