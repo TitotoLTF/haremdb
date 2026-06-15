@@ -16,7 +16,7 @@
     </div>
     <div class="w-full flex flex-col gap-2 flex-1">
       <!-- 第一行 -->
-      <TagSelect v-model="file.tags" :allow-create="true" />
+      <TagSelect ref="tagSelectRef" v-model="file.tags" :allow-create="true" @confirm="handleConfirm" />
 
       <!-- 第二行 -->
       <div class="w-full flex gap-2 flex-1">
@@ -104,12 +104,7 @@
         </el-input>
         <div class="flex h-auto">
           <el-button type="danger" plain icon="Delete" @click="emit('delete', file)"></el-button>
-          <el-button
-            type="success"
-            plain
-            icon="CircleCheck"
-            @click="emit('confirm', file)"
-          ></el-button>
+          <el-button type="success" plain icon="CircleCheck" @click="handleConfirm"></el-button>
         </div>
       </div>
     </div>
@@ -117,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { nextTick, ref, watch, watchEffect } from 'vue'
 import { isEmpty, filter } from 'lodash'
 import { filesize } from 'filesize'
 
@@ -135,6 +130,7 @@ const props = defineProps({
 
 const file = ref({})
 const emit = defineEmits(['delete', 'confirm'])
+const tagSelectRef = ref(null)
 
 watchEffect(() => {
   file.value = props.data
@@ -142,6 +138,17 @@ watchEffect(() => {
     file.value.mods = []
   }
 })
+
+watch(
+  () => props.data && props.data.$loki,
+  async () => {
+    if (!props.showMoreRemark) return
+
+    await nextTick()
+    tagSelectRef.value?.focusInput?.()
+  },
+  { immediate: true }
+)
 
 function totalModFileSize(modFiles) {
   if (!isEmpty(modFiles)) {
@@ -153,6 +160,11 @@ function totalModFileSize(modFiles) {
 
 function onRemoveMod(mod) {
   file.value.mods = filter(file.value.mods, (m) => m.path !== mod.path)
+}
+
+function handleConfirm() {
+  // 让按钮点击和回车确认走同一条保存路径。
+  emit('confirm', file.value)
 }
 </script>
 
